@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مینی اپ تسلا ۳۶۹</title>
+    <!-- اتصال به اسکریپت رسمی مینی‌اپ تلگرام -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- استفاده از پلتفرم طراحی Tailwind برای زیبایی بدون دردسر -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-6">
+
+    <!-- بخش بالایی: اطلاعات کاربر و موجودی -->
+    <div class="w-full flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-indigo-500/30">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-lg">⚡</div>
+            <div>
+                <p id="username" class="text-sm font-semibold">در حال بارگذاری...</p>
+                <p class="text-xs text-indigo-300">خوش آمدید</p>
+            </div>
+        </div>
+        <div class="text-left">
+            <p class="text-xs text-emerald-400">موجودی ولت</p>
+            <p class="font-bold text-sm">0.00 TON</p>
+        </div>
+    </div>
+
+    <!-- بخش میانی: دکمه بزرگ شانس (انیمیشنی به سبک همستر) -->
+    <div class="flex flex-col items-center my-auto">
+        <div onclick="triggerLuckEffect()" class="w-48 h-48 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(99,102,241,0.5)] cursor-pointer active:scale-95 transition-all duration-100 border-4 border-indigo-300 animate-pulse">
+            <span class="text-6xl">🔮</span>
+        </div>
+        <p class="mt-6 text-center text-indigo-200 text-sm">برای امتحان شانس کائنات، گردونه را لمس کن!</p>
+    </div>
+
+    <!-- بخش پایینی: تب‌ها و منوی اصلی -->
+    <div class="w-full grid grid-cols-2 gap-4 bg-slate-900/80 p-2 rounded-2xl border border-slate-700">
+        <button class="bg-indigo-600 py-3 rounded-xl font-bold text-center text-sm shadow-lg">🎰 بخت‌آزمایی شبانه</button>
+        <button class="bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-bold text-center text-sm text-slate-300">🔒 اتاق‌های بازی</button>
+    </div>
+
+    <script>
+        // آماده‌سازی ابزار تلگرام
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // باز شدن مینی اپ به صورت تمام صفحه
+
+        // خواندن نام کاربر واقعی از تلگرام
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+        } else {
+            document.getElementById('username').innerText = "کاربر تسلا";
+        }
+
+        // افکت کلیک (شبیه به همستر)
+        function triggerLuckEffect() {
+            tg.HapticFeedback.impactOccurred('medium'); // ایجاد لرزش ظریف در گوشی
+            alert("انرژی ۳۶۹ آزاد شد! در قدم‌های بعد این دکمه تراکنش تون‌کوین رو باز میکنه.");
+        }
+    </script>
+</body>
+</html>
