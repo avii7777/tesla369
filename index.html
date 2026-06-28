@@ -47,10 +47,9 @@
         <button class="bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-bold text-center text-sm text-slate-300">🔒 اتاق‌های بازی</button>
     </div>
 
-    <script>
-        // آماده‌سازی ابزار تلگرام
+// آماده‌سازی ابزار تلگرام
         const tg = window.Telegram.WebApp;
-        tg.expand(); // باز شدن مینی اپ به صورت تمام صفحه
+        tg.expand(); // باز شدن تمام صفحه
 
         // خواندن نام کاربر واقعی از تلگرام
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -59,11 +58,46 @@
             document.getElementById('username').innerText = "کاربر تسلا";
         }
 
-        // افکت کلیک (شبیه به همستر)
+        // افکت لمس گوی جادویی
         function triggerLuckEffect() {
-            tg.HapticFeedback.impactOccurred('medium'); // ایجاد لرزش ظریف در گوشی
-            alert("انرژی ۳۶۹ آزاد شد! در قدم‌های بعد این دکمه تراکنش تون‌کوین رو باز میکنه.");
+            tg.HapticFeedback.impactOccurred('medium'); // ویبره ظریف گوشی
+            
+            // ارسال دستور شانس به ربات
+            tg.sendData(JSON.stringify({
+                action: 'spin_wheel',
+                timestamp: Date.now()
+            }));
+            
+            // بستن خودکار مینی‌اپ بعد از ارسال دیتا
+            tg.close();
         }
-    </script>
+
+        // عملکرد دکمه اتاق‌های بازی
+        function openRooms() {
+            tg.HapticFeedback.impactOccurred('light');
+            
+            // ارسال درخواست به ربات برای مدیریت یا مشاهده اتاق‌ها
+            tg.sendData(JSON.stringify({
+                action: 'view_rooms'
+            }));
+            
+            tg.close();
+        }
+
+        // عملکرد دکمه بخت‌آزمایی شبانه
+        function openNightly() {
+            tg.HapticFeedback.impactOccurred('light');
+            
+            tg.sendData(JSON.stringify({
+                action: 'buy_ticket'
+            }));
+            
+            tg.close();
+        }
+
+        // متصل کردن دکمه‌های HTML به این توابع جدید
+        // (اینجا دکمه‌ها را به توابع جاوااسکریپت وصل می‌کنیم)
+        document.querySelectorAll('button')[0].setAttribute('onclick', 'openNightly()');
+        document.querySelectorAll('button')[1].setAttribute('onclick', 'openRooms()');
 </body>
 </html>
