@@ -62,14 +62,39 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
+const tg = window.Telegram.WebApp;
         tg.expand();
 
+        let userTelegramId = null;
+
+        // گرفتن اطلاعات کاربر از تلگرام
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+            userTelegramId = tg.initDataUnsafe.user.id; // ذخیره آیدی تلگرام کاربر
         } else {
             document.getElementById('username').innerText = "کاربر تسلا";
+            userTelegramId = 123456789; // آیدی فیک برای تست در مرورگر کامپیوتر
         }
+
+        const SERVER_URL = "http://localhost:3000"; 
+
+        // 💰 ۱. تابع خواندن موجودی واقعی ولت از سرور تو
+        function loadUserBalance() {
+            if (!userTelegramId) return;
+
+            fetch(`${SERVER_URL}/api/user/${userTelegramId}`)
+                .then(res => res.json())
+                .then(data => {
+                    // نمایش موجودی به همراه واحد تومان یا تبدیل شده به فرمت شیک
+                    document.getElementById('wallet-balance').innerText = data.balance.toLocaleString() + " تومان";
+                })
+                .catch(err => {
+                    document.getElementById('wallet-balance').innerText = "خطا در ولت";
+                });
+        }
+
+        // به محض باز شدن مینی‌اپ، موجودی ولت را استعلام بگیر
+        loadUserBalance();
 
         // 🔄 سوئیچ کردن بین صفحات بدون بسته شدن مینی‌اپ
         function switchPage(pageId) {
@@ -85,16 +110,16 @@
             event.currentTarget.classList.remove('text-slate-400');
             event.currentTarget.classList.add('bg-indigo-600/20', 'text-indigo-400');
 
-            // اگر کاربر رفت به صفحه اتاق‌ها، لیست را زنده لود کن
             if (pageId === 'rooms') {
                 loadRoomsFromServer();
             }
+            // هر بار که کاربر به صفحه خانه برگشت هم موجودی را رفرش کن
+            if (pageId === 'home') {
+                loadUserBalance();
+            }
         }
 
-        // 🌐 لود کردن واقعی اتاق‌ها از سرور وب کامپیوتر تو (بدون دخالت تلگرام!)
-        // نکته: در حالت لوکال آدرس آی‌پی کامپیوترت یا لینک لوکال را می‌گذاریم
-        const SERVER_URL = "http://localhost:3000"; 
-
+        // 🌐 لود کردن واقعی اتاق‌ها از سرور وب
         function loadRoomsFromServer() {
             const container = document.getElementById('rooms-container');
             
@@ -112,7 +137,7 @@
                             <div class="flex justify-between items-center bg-slate-800/40 p-3 rounded-xl border border-slate-700">
                                 <div>
                                     <p class="text-xs font-bold text-indigo-300">🆔 اتاق ${room.room_id}</p>
-                                    <p class="text-[10px] text-slate-400">ورودی: ${room.entry_fee} تومان | ظرفیت: ${room.capacity} نفر</p>
+                                    <p class="text-[10px] text-slate-400">ورودی: ${room.entry_fee.toLocaleString()} تومان | ظرفیت: ${room.capacity} نفر</p>
                                 </div>
                                 <button onclick="joinRoomDirectly('${room.room_id}')" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow active:scale-95 transition-all">ورود</button>
                             </div>
@@ -126,18 +151,23 @@
 
         function joinRoomDirectly(roomId) {
             tg.HapticFeedback.impactOccurred('medium');
-            // در قدم‌های بعدی این دکمه کاربر را بدون بستن صفحه عضو اتاق دیتابیس می‌کند!
             tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
             tg.close();
         }
 
-        // ⚡ اتصال به سوکت زنده برای دریافت تغییرات آنی
+        // ⚡ اتصال به سوکت زنده برای تغییرات آنی
         const socket = io(SERVER_URL);
         socket.on('room_created', () => {
             if (document.getElementById('page-rooms').classList.contains('active')) {
-                loadRoomsFromServer(); // رفرش خودکار لیست به محض ساخت اتاق جدید!
+                loadRoomsFromServer();
             }
         });
+        
+        // به محض اینکه قرعه‌کشی تمام شد، ولت را دوباره لود کن تا جایزه برنده زنده اعمال شود!
+        socket.on('lottery_finished', () => {
+            loadUserBalance();
+        });
+        
     </script>
 </body>
 </html>
