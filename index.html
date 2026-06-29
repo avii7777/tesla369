@@ -6,95 +6,138 @@
     <title>مینی اپ تسلا ۳۶۹</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body {
             background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
             color: white;
             font-family: system-ui, -apple-system, sans-serif;
+            user-select: none;
         }
+        .page { display: none; }
+        .page.active { display: flex; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-between min-h-screen p-6">
+<body class="flex flex-col min-h-screen p-4 justify-between">
 
-    <div class="w-full flex justify-between items-center bg-slate-800/50 p-4 rounded-2xl border border-indigo-500/30">
+    <div class="w-full flex justify-between items-center bg-slate-800/60 p-4 rounded-2xl border border-indigo-500/30 backdrop-blur-md">
         <div class="flex items-center gap-2">
-            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-lg">⚡</div>
+            <div class="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center font-bold">⚡</div>
             <div>
-                <p id="username" class="text-sm font-semibold">در حال بارگذاری...</p>
-                <p class="text-xs text-indigo-300">خوش آمدید</p>
+                <p id="username" class="text-xs font-semibold">در حال بارگذاری...</p>
+                <p class="text-[10px] text-indigo-300">مدار ۳۶۹ کائنات</p>
             </div>
         </div>
         <div class="text-left">
-            <p class="text-xs text-emerald-400">موجودی ولت</p>
-            <p class="font-bold text-sm">0.00 TON</p>
+            <p class="text-[10px] text-emerald-400">موجودی ولت</p>
+            <p class="font-bold text-xs" id="wallet-balance">0.00 TON</p>
         </div>
     </div>
 
-    <div class="flex flex-col items-center my-auto">
-        <div id="luck-ball" class="w-48 h-48 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(99,102,241,0.5)] cursor-pointer active:scale-95 transition-all duration-100 border-4 border-indigo-300 animate-pulse">
-            <span class="text-6xl">🔮</span>
+    <div id="page-home" class="page active flex-col items-center my-auto gap-6">
+        <div id="luck-ball" class="w-44 h-44 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.4)] cursor-pointer active:scale-95 transition-all duration-100 border-4 border-indigo-300 animate-pulse">
+            <span class="text-5xl">🔮</span>
         </div>
-        <p class="mt-6 text-center text-indigo-200 text-sm">برای امتحان شانس کائنات، گردونه را لمس کن!</p>
+        <p class="text-center text-indigo-200 text-xs px-4">برای جذب انرژی مدار تسلا، گوی کائنات را لمس کن!</p>
     </div>
 
-    <div class="w-full grid grid-cols-2 gap-4 bg-slate-900/80 p-2 rounded-2xl border border-slate-700">
-        <button id="btn-nightly" class="bg-indigo-600 py-3 rounded-xl font-bold text-center text-sm shadow-lg">🎰 بخت‌آزمایی شبانه</button>
-        <button id="btn-rooms" class="bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-bold text-center text-sm text-slate-300">🔒 اتاق‌های بازی</button>
+    <div id="page-rooms" class="page flex-col w-full my-auto gap-4">
+        <h2 class="text-sm font-bold text-indigo-400 border-b border-slate-700 pb-2">🎰 اتاق‌های شانس فعال (زنده)</h2>
+        <div id="rooms-container" class="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
+            <p class="text-xs text-slate-400 text-center py-4">در حال جستجوی اتاق‌های فعال در کائنات...</p>
+        </div>
+    </div>
+
+    <div id="page-nightly" class="page flex-col w-full my-auto items-center gap-4 text-center">
+        <span class="text-5xl">🎟️</span>
+        <h2 class="text-sm font-bold text-purple-400">بخت‌آزمایی بزرگ شبانه تسلا</h2>
+        <p class="text-xs text-slate-300 px-6">هر شب ساعت ۲۲:۰۰ قرعه‌کشی بزرگ انجام می‌شود. ۹۰٪ مبالغ به یک برنده خوش‌شانس می‌رسد!</p>
+        <button class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold text-xs mt-4 shadow-lg active:scale-95 transition-all">خرید بلیط شانس (۲۰,۰۰۰ تومان)</button>
+    </div>
+
+    <div class="w-full grid grid-cols-3 gap-2 bg-slate-900/90 p-2 rounded-2xl border border-slate-800 backdrop-blur-lg">
+        <button onclick="switchPage('home')" class="nav-btn bg-indigo-600/20 text-indigo-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🔮 خانه</button>
+        <button onclick="switchPage('rooms')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🔒 اتاق‌ها</button>
+        <button onclick="switchPage('nightly')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎰 شبانه</button>
     </div>
 
     <script>
-        // آماده‌سازی ابزار تلگرام
         const tg = window.Telegram.WebApp;
-        tg.expand(); // باز شدن مینی اپ به صورت تمام صفحه
+        tg.expand();
 
-        // خواندن نام کاربر واقعی از تلگرام
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
         } else {
             document.getElementById('username').innerText = "کاربر تسلا";
         }
 
-        // افکت لمس گوی جادویی
-        function triggerLuckEffect() {
-            tg.HapticFeedback.impactOccurred('medium'); // ایجاد لرزش ظریف در گوشی
-            
-            // ارسال دستور شانس به ربات
-            tg.sendData(JSON.stringify({
-                action: 'spin_wheel',
-                timestamp: Date.now()
-            }));
-            
-            // بستن خودکار مینی‌اپ بعد از ارسال دیتا
-            tg.close();
-        }
-
-        // عملکرد دکمه اتاق‌های بازی
-        function openRooms() {
+        // 🔄 سوئیچ کردن بین صفحات بدون بسته شدن مینی‌اپ
+        function switchPage(pageId) {
             tg.HapticFeedback.impactOccurred('light');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+
+            // مدیریت استایل دکمه‌های منو
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600/20', 'text-indigo-400');
+                btn.classList.add('text-slate-400');
+            });
+            event.currentTarget.classList.remove('text-slate-400');
+            event.currentTarget.classList.add('bg-indigo-600/20', 'text-indigo-400');
+
+            // اگر کاربر رفت به صفحه اتاق‌ها، لیست را زنده لود کن
+            if (pageId === 'rooms') {
+                loadRoomsFromServer();
+            }
+        }
+
+        // 🌐 لود کردن واقعی اتاق‌ها از سرور وب کامپیوتر تو (بدون دخالت تلگرام!)
+        // نکته: در حالت لوکال آدرس آی‌پی کامپیوترت یا لینک لوکال را می‌گذاریم
+        const SERVER_URL = "http://localhost:3000"; 
+
+        function loadRoomsFromServer() {
+            const container = document.getElementById('rooms-container');
             
-            // ارسال درخواست به ربات برای مدیریت یا مشاهده اتاق‌ها
-            tg.sendData(JSON.stringify({
-                action: 'view_rooms'
-            }));
-            
+            fetch(`${SERVER_URL}/api/rooms`)
+                .then(res => res.json())
+                .then(rooms => {
+                    if (rooms.length === 0) {
+                        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">هیچ اتاق فعالی پیدا نشد. ابتدا در ربات یک اتاق بسازید!</p>';
+                        return;
+                    }
+                    
+                    container.innerHTML = '';
+                    rooms.forEach(room => {
+                        container.innerHTML += `
+                            <div class="flex justify-between items-center bg-slate-800/40 p-3 rounded-xl border border-slate-700">
+                                <div>
+                                    <p class="text-xs font-bold text-indigo-300">🆔 اتاق ${room.room_id}</p>
+                                    <p class="text-[10px] text-slate-400">ورودی: ${room.entry_fee} تومان | ظرفیت: ${room.capacity} نفر</p>
+                                </div>
+                                <button onclick="joinRoomDirectly('${room.room_id}')" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow active:scale-95 transition-all">ورود</button>
+                            </div>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    container.innerHTML = '<p class="text-xs text-rose-400 text-center py-4">❌ خطا در اتصال به سرور تسلا</p>';
+                });
+        }
+
+        function joinRoomDirectly(roomId) {
+            tg.HapticFeedback.impactOccurred('medium');
+            // در قدم‌های بعدی این دکمه کاربر را بدون بستن صفحه عضو اتاق دیتابیس می‌کند!
+            tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
             tg.close();
         }
 
-        // عملکرد دکمه بخت‌آزمایی شبانه
-        function openNightly() {
-            tg.HapticFeedback.impactOccurred('light');
-            
-            tg.sendData(JSON.stringify({
-                action: 'buy_ticket'
-            }));
-            
-            tg.close();
-        }
-
-        // متصل کردن دقیق توابع به دکمه‌ها و المان‌های صفحه بدون اختلال متنی
-        document.getElementById('luck-ball').addEventListener('click', triggerLuckEffect);
-        document.getElementById('btn-nightly').addEventListener('click', openNightly);
-        document.getElementById('btn-rooms').addEventListener('click', openRooms);
+        // ⚡ اتصال به سوکت زنده برای دریافت تغییرات آنی
+        const socket = io(SERVER_URL);
+        socket.on('room_created', () => {
+            if (document.getElementById('page-rooms').classList.contains('active')) {
+                loadRoomsFromServer(); // رفرش خودکار لیست به محض ساخت اتاق جدید!
+            }
+        });
     </script>
 </body>
 </html>
