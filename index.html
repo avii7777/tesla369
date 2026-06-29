@@ -148,12 +148,18 @@ const tg = window.Telegram.WebApp;
                     container.innerHTML = '<p class="text-xs text-rose-400 text-center py-4">❌ خطا در اتصال به سرور تسلا</p>';
                 });
         }
-
-        function joinRoomDirectly(roomId) {
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
-            tg.close();
-        }
+function joinRoomDirectly(roomId) {
+    tg.HapticFeedback.impactOccurred('medium');
+    tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
+    
+    // کارهای گرافیکی بعد از کلیک:
+    alert("درخواست ورود فرستاده شد! لطفاً چت ربات را چک کنید.");
+    
+    // رفرش کردن موجودی ولت بعد از ۲ ثانیه که دیتابیس آپدیت شد
+    setTimeout(() => {
+        loadUserBalance();
+    }, 2000);
+}
 
         // ⚡ اتصال به سوکت زنده برای تغییرات آنی
         const socket = io(SERVER_URL);
