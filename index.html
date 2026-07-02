@@ -20,7 +20,7 @@
 </head>
 <body class="flex flex-col min-h-screen p-4 justify-between">
 
-    <div class="w-full flex justify-between items-center bg-slate-800/60 p-4 rounded-2xl border border-indigo-500/30 backdrop-blur-md">
+    <div id="main-header" class="w-full flex justify-between items-center bg-slate-800/60 p-4 rounded-2xl border border-indigo-500/30 backdrop-blur-md">
         <div class="flex items-center gap-2">
             <div class="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center font-bold">⚡</div>
             <div>
@@ -29,9 +29,22 @@
             </div>
         </div>
         <div class="text-left">
-            <p class="text-[10px] text-emerald-400">موجودی ولت</p>
-            <p class="font-bold text-xs" id="wallet-balance">0.00 TON</p>
+            <p class="text-[10px] text-emerald-400">موجوبی ولت</p>
+            <p class="font-bold text-xs" id="wallet-balance">0.00 تومان</p>
         </div>
+    </div>
+
+    <div id="page-lock" class="page flex-col items-center my-auto gap-5 text-center hidden">
+        <span class="text-6xl animate-bounce">🔒</span>
+        <h2 class="text-base font-bold text-rose-400">دسترسی شما محدود است!</h2>
+        <p class="text-xs text-slate-300 px-6 leading-relaxed">
+            رفیق، برای فعال‌سازی مینی‌اپ تسلا ۳۶۹ و مدار کائنات، باید حداقل **۲ نفر** را از طریق لینک اختصاصی خودت به ربات دعوت کنی.
+        </p>
+        <div class="bg-slate-900/60 border border-slate-700 p-3 rounded-xl w-full max-w-xs">
+            <p class="text-[10px] text-indigo-400 mb-1">🔗 لینک دعوت اختصاصی شما:</p>
+            <input type="text" id="invite-link-input" readonly class="bg-slate-950 text-slate-300 text-[10px] text-center p-2 rounded-lg w-full border border-slate-800 outline-none select-all" value="">
+        </div>
+        <p class="text-[10px] text-slate-400">لینک بالا را کپی کن و برای دوستانت بفرست.</p>
     </div>
 
     <div id="page-home" class="page active flex-col items-center my-auto gap-6">
@@ -52,17 +65,17 @@
         <span class="text-5xl">🎟️</span>
         <h2 class="text-sm font-bold text-purple-400">بخت‌آزمایی بزرگ شبانه تسلا</h2>
         <p class="text-xs text-slate-300 px-6">هر شب ساعت ۲۲:۰۰ قرعه‌کشی بزرگ انجام می‌شود. ۹۰٪ مبالغ به یک برنده خوش‌شانس می‌رسد!</p>
-        <button class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold text-xs mt-4 shadow-lg active:scale-95 transition-all">خرید بلیط شانس (۲۰,۰۰۰ تومان)</button>
+        <button class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold text-xs mt-4 shadow-lg active:scale-95 transition-all">خرید بلیط شانس (۵,۰۰۰ تومان)</button>
     </div>
 
-    <div class="w-full grid grid-cols-3 gap-2 bg-slate-900/90 p-2 rounded-2xl border border-slate-800 backdrop-blur-lg">
+    <div id="main-nav" class="w-full grid grid-cols-3 gap-2 bg-slate-900/90 p-2 rounded-2xl border border-slate-800 backdrop-blur-lg">
         <button onclick="switchPage('home')" class="nav-btn bg-indigo-600/20 text-indigo-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🔮 خانه</button>
-        <button onclick="switchPage('rooms')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🔒 اتاق‌ها</button>
-        <button onclick="switchPage('nightly')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎰 شبانه</button>
+        <button onclick="switchPage('rooms')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎰 اتاق‌ها</button>
+        <button onclick="switchPage('nightly')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎟️ شبانه</button>
     </div>
 
     <script>
-const tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
 
         let userTelegramId = null;
@@ -70,39 +83,56 @@ const tg = window.Telegram.WebApp;
         // گرفتن اطلاعات کاربر از تلگرام
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
-            userTelegramId = tg.initDataUnsafe.user.id; // ذخیره آیدی تلگرام کاربر
+            userTelegramId = tg.initDataUnsafe.user.id;
         } else {
             document.getElementById('username').innerText = "کاربر تسلا";
-            userTelegramId = 123456789; // آیدی فیک برای تست در مرورگر کامپیوتر
+            userTelegramId = 123456789; // آیدی تستی
         }
 
-        const SERVER_URL = "const API_URL = "https://4062-104-28-251-138.ngrok-free.app";"; 
+        // 🔗 ست کردن آدرس سرور اختصاصی نگراک
+        const SERVER_URL = "https://4062-104-28-251-138.ngrok-free.app"; 
 
-        // 💰 ۱. تابع خواندن موجودی واقعی ولت از سرور تو
-        function loadUserBalance() {
+        // قرار دادن لینک دعوت در اینپوت صفحه قفل
+        document.getElementById('invite-link-input').value = `https://t.me/Tesla369Bot?start=${userTelegramId}`;
+
+        // 💰 ۱. تابع خواندن وضعیت ولت و قفل رفرال از بک‌آند
+        function checkUserStatusAndBalance() {
             if (!userTelegramId) return;
 
             fetch(`${SERVER_URL}/api/user/${userTelegramId}`)
                 .then(res => res.json())
                 .then(data => {
-                    // نمایش موجودی به همراه واحد تومان یا تبدیل شده به فرمت شیک
+                    // بروزرسانی موجودی ولت روی صفحه
                     document.getElementById('wallet-balance').innerText = data.balance.toLocaleString() + " تومان";
+                    
+                    // بررسی اینکه آیا کاربر فعال است یا خیر؟
+                    if (data.is_active === 1) {
+                        // فعال است -> صفحات اصلی را نشان بده و قفل را پنهان کن
+                        document.getElementById('page-lock').style.display = 'none';
+                        document.getElementById('main-header').style.display = 'flex';
+                        document.getElementById('main-nav').style.display = 'grid';
+                    } else {
+                        // قفل است -> همه چیز را پنهان کن و فقط صفحه قفل را نشان بده
+                        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+                        document.getElementById('page-lock').style.display = 'flex';
+                        document.getElementById('main-header').style.display = 'none';
+                        document.getElementById('main-nav').style.display = 'none';
+                    }
                 })
                 .catch(err => {
-                    document.getElementById('wallet-balance').innerText = "خطا در ولت";
+                    document.getElementById('wallet-balance').innerText = "خطا در اتصال";
                 });
         }
 
-        // به محض باز شدن مینی‌اپ، موجودی ولت را استعلام بگیر
-        loadUserBalance();
+        // بررسی وضعیت در بدو ورود به مینی‌اپ
+        checkUserStatusAndBalance();
 
-        // 🔄 سوئیچ کردن بین صفحات بدون بسته شدن مینی‌اپ
+        // 🔄 سوئیچ کردن بین صفحات
         function switchPage(pageId) {
             tg.HapticFeedback.impactOccurred('light');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
 
-            // مدیریت استایل دکمه‌های منو
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-indigo-600/20', 'text-indigo-400');
                 btn.classList.add('text-slate-400');
@@ -113,13 +143,12 @@ const tg = window.Telegram.WebApp;
             if (pageId === 'rooms') {
                 loadRoomsFromServer();
             }
-            // هر بار که کاربر به صفحه خانه برگشت هم موجودی را رفرش کن
             if (pageId === 'home') {
-                loadUserBalance();
+                checkUserStatusAndBalance();
             }
         }
 
-        // 🌐 لود کردن واقعی اتاق‌ها از سرور وب
+        // 🌐 لود کردن اتاق‌ها از سرور
         function loadRoomsFromServer() {
             const container = document.getElementById('rooms-container');
             
@@ -148,18 +177,17 @@ const tg = window.Telegram.WebApp;
                     container.innerHTML = '<p class="text-xs text-rose-400 text-center py-4">❌ خطا در اتصال به سرور تسلا</p>';
                 });
         }
-function joinRoomDirectly(roomId) {
-    tg.HapticFeedback.impactOccurred('medium');
-    tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
-    
-    // کارهای گرافیکی بعد از کلیک:
-    alert("درخواست ورود فرستاده شد! لطفاً چت ربات را چک کنید.");
-    
-    // رفرش کردن موجودی ولت بعد از ۲ ثانیه که دیتابیس آپدیت شد
-    setTimeout(() => {
-        loadUserBalance();
-    }, 2000);
-}
+
+        function joinRoomDirectly(roomId) {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
+            
+            alert("درخواست ورود فرستاده شد! لطفاً چت ربات را چک کنید.");
+            
+            setTimeout(() => {
+                checkUserStatusAndBalance();
+            }, 2000);
+        }
 
         // ⚡ اتصال به سوکت زنده برای تغییرات آنی
         const socket = io(SERVER_URL);
@@ -169,9 +197,8 @@ function joinRoomDirectly(roomId) {
             }
         });
         
-        // به محض اینکه قرعه‌کشی تمام شد، ولت را دوباره لود کن تا جایزه برنده زنده اعمال شود!
         socket.on('lottery_finished', () => {
-            loadUserBalance();
+            checkUserStatusAndBalance();
         });
         
     </script>
