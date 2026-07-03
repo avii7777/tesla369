@@ -89,17 +89,21 @@
             userTelegramId = 123456789; // آیدی تستی
         }
 
-        // 🔗 حذف فاصله (Space) اضافی برای جلوگیری از قطع سوکت
-        const SERVER_URL = "https://18ed-104-28-251-139.ngrok-free.app "; 
+        // 🔗 آدرس جدید نگراک بدون فاصله اضافی
+        const SERVER_URL = "https://18ed-104-28-251-139.ngrok-free.app"; 
 
         // قرار دادن لینک دعوت جدید در اینپوت صفحه قفل مینی‌اپ
         document.getElementById('invite-link-input').value = `https://t.me/VegasLand_bot?start=${userTelegramId}`;
         
-        // 💰 ۱. تابع خواندن وضعیت ولت و قفل رفرال از بک‌آند
+        // 💰 ۱. تابع خواندن وضعیت ولت و قفل رفرال از بک‌آند با هدر ضد-هشدار نگراک
         function checkUserStatusAndBalance() {
             if (!userTelegramId) return;
 
-            fetch(`${SERVER_URL}/api/user/${userTelegramId}`)
+            fetch(`${SERVER_URL}/api/user/${userTelegramId}`, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            })
                 .then(res => res.json())
                 .then(data => {
                     // بروزرسانی موجودی ولت روی صفحه
@@ -107,12 +111,10 @@
                     
                     // بررسی اینکه آیا کاربر فعال است یا خیر؟
                     if (data.is_active === 1) {
-                        // فعال است -> صفحات اصلی را نشان بده و قفل را پنهان کن
                         document.getElementById('page-lock').style.display = 'none';
                         document.getElementById('main-header').style.display = 'flex';
                         document.getElementById('main-nav').style.display = 'grid';
                     } else {
-                        // قفل است -> همه چیز را پنهان کن و فقط صفحه قفل را نشان بده
                         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
                         document.getElementById('page-lock').style.display = 'flex';
                         document.getElementById('main-header').style.display = 'none';
@@ -148,11 +150,15 @@
             }
         }
 
-        // 🌐 لود کردن اتاق‌ها از سرور
+        // 🌐 لود کردن اتاق‌ها از سرور با هدر ضد-هشدار نگراک
         function loadRoomsFromServer() {
             const container = document.getElementById('rooms-container');
             
-            fetch(`${SERVER_URL}/api/rooms`)
+            fetch(`${SERVER_URL}/api/rooms`, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            })
                 .then(res => res.json())
                 .then(rooms => {
                     if (rooms.length === 0) {
@@ -202,12 +208,12 @@
             }
         });
         
-        // ۲. آپدیت زنده ظرفیت بدون باگ undefined
+        // ۲. آپدیت زنده ظرفیت
         socket.on('room_update', (data) => {
             const countText = document.getElementById(`room-count-${data.roomId}`);
             if (countText) {
                 countText.innerText = `ظرفیت: ${data.currentCount}/${data.capacity} نفر`;
-                countText.classList.add('text-emerald-400'); // افکت رنگی موقت
+                countText.classList.add('text-emerald-400');
                 setTimeout(() => countText.classList.remove('text-emerald-400'), 1000);
             }
         });
