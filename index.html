@@ -80,36 +80,32 @@
 
         let userTelegramId = null;
 
-        // گرفتن اطلاعات کاربر از تلگرام
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
             userTelegramId = tg.initDataUnsafe.user.id;
         } else {
             document.getElementById('username').innerText = "کاربر تسلا";
-            userTelegramId = 123456789; // آیدی تستی
+            userTelegramId = 123456789;
         }
 
-        // 🔗 آدرس جدید نگراک بدون فاصله اضافی
+        // 🔗 ست شدن آدرس جدید لوکال‌تونل شما
         const SERVER_URL = "https://tangy-news-care.loca.lt"; 
 
-        // قرار دادن لینک دعوت جدید در اینپوت صفحه قفل مینی‌اپ
         document.getElementById('invite-link-input').value = `https://t.me/VegasLand_bot?start=${userTelegramId}`;
         
-        // 💰 ۱. تابع خواندن وضعیت ولت و قفل رفرال از بک‌آند با هدر ضد-هشدار نگراک
+        // 💰 خواندن وضعیت کاربر با هدر مخصوص لوکال‌تونل
         function checkUserStatusAndBalance() {
             if (!userTelegramId) return;
 
             fetch(`${SERVER_URL}/api/user/${userTelegramId}`, {
                 headers: {
-                    'ngrok-skip-browser-warning': 'true'
+                    'Bypass-Tunnel-Reminder': 'true'
                 }
             })
                 .then(res => res.json())
                 .then(data => {
-                    // بروزرسانی موجودی ولت روی صفحه
                     document.getElementById('wallet-balance').innerText = data.balance.toLocaleString() + " تومان";
                     
-                    // بررسی اینکه آیا کاربر فعال است یا خیر؟
                     if (data.is_active === 1) {
                         document.getElementById('page-lock').style.display = 'none';
                         document.getElementById('main-header').style.display = 'flex';
@@ -126,10 +122,8 @@
                 });
         }
 
-        // بررسی وضعیت در بدو ورود به مینی‌اپ
         checkUserStatusAndBalance();
 
-        // 🔄 سوئیچ کردن بین صفحات
         function switchPage(pageId) {
             tg.HapticFeedback.impactOccurred('light');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -150,13 +144,13 @@
             }
         }
 
-        // 🌐 لود کردن اتاق‌ها از سرور با هدر ضد-هشدار نگراک
+        // 🌐 لود کردن اتاق‌ها با هدر مخصوص لوکال‌تونل
         function loadRoomsFromServer() {
             const container = document.getElementById('rooms-container');
             
             fetch(`${SERVER_URL}/api/rooms`, {
                 headers: {
-                    'ngrok-skip-browser-warning': 'true'
+                    'Bypass-Tunnel-Reminder': 'true'
                 }
             })
                 .then(res => res.json())
@@ -190,29 +184,23 @@
         function joinRoomDirectly(roomId) {
             tg.HapticFeedback.impactOccurred('medium');
             tg.sendData(JSON.stringify({ action: 'join_via_app', roomId: roomId }));
-            
             alert("درخواست ورود فرستاده شد! لطفاً چت ربات را چک کنید.");
-            
-            setTimeout(() => {
-                checkUserStatusAndBalance();
-            }, 2000);
+            setTimeout(() => { checkUserStatusAndBalance(); }, 2000);
         }
 
-        // ⚡ اتصال هوشمند به سوکت زنده همراه با هدر اختصاصی نگراک
-const socket = io(SERVER_URL, {
-    extraHeaders: {
-        "ngrok-skip-browser-warning": "true"
-    }
-});
+        // ⚡ اتصال به سوکت لایو همراه با هدر اختصاصی لوکال‌تونل
+        const socket = io(SERVER_URL, {
+            extraHeaders: {
+                "Bypass-Tunnel-Reminder": "true"
+            }
+        });
 
-        // ۱. وقتی اتاق جدیدی ساخته می‌شود
         socket.on('room_created', () => {
             if (document.getElementById('page-rooms').classList.contains('active')) {
                 loadRoomsFromServer();
             }
         });
         
-        // ۲. آپدیت زنده ظرفیت
         socket.on('room_update', (data) => {
             const countText = document.getElementById(`room-count-${data.roomId}`);
             if (countText) {
@@ -222,24 +210,18 @@ const socket = io(SERVER_URL, {
             }
         });
 
-        // ۳. وقتی ظرفیت کامل می‌شود و قرعه‌کشی به پایان می‌رسد
         socket.on('lottery_finished', (data) => {
             checkUserStatusAndBalance();
-
             const roomCard = document.getElementById(`room-card-${data.roomId}`);
             if (roomCard) {
                 roomCard.style.opacity = "0";
                 roomCard.style.transform = "scale(0.9)";
                 setTimeout(() => roomCard.remove(), 500);
             }
-
             tg.HapticFeedback.notificationOccurred('success');
-            tg.showAlert(
-                `🎉 مدار کائنات چرخید!\n\n🎰 اتاق ${data.roomId} به پایان رسید.\n🏆 برنده خوش‌شانس: ${data.winnerName}\n💰 جایزه واریز شد.`
-            );
+            tg.showAlert(`🎉 مدار کائنات چرخید!\n\n🎰 اتاق ${data.roomId} به پایان رسید.\n🏆 برنده خوش‌شانس: ${data.winnerName}\n💰 جایزه واریز شد.`);
         });
 
-        // ۴. وقتی اتاق به خاطر تایم‌اوت منحل می‌شود
         socket.on('room_cancelled', (data) => {
             const roomCard = document.getElementById(`room-card-${data.roomId}`);
             if (roomCard) {
