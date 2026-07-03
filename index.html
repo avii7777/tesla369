@@ -198,8 +198,12 @@
             }, 2000);
         }
 
-        // ⚡ اتصال به سوکت زنده برای تغییرات آنی
-        const socket = io(SERVER_URL);
+        // ⚡ اتصال هوشمند به سوکت زنده همراه با هدر اختصاصی نگراک
+const socket = io(SERVER_URL, {
+    extraHeaders: {
+        "ngrok-skip-browser-warning": "true"
+    }
+});
 
         // ۱. وقتی اتاق جدیدی ساخته می‌شود
         socket.on('room_created', () => {
