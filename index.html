@@ -89,8 +89,8 @@
             userTelegramId = 123456789; // آیدی تستی
         }
 
-        // 🔗 ست کردن آدرس سرور اختصاصی نگراک
-        const SERVER_URL = " https://7c46-104-28-251-139.ngrok-free.app"; 
+        // 🔗 حذف فاصله (Space) اضافی برای جلوگیری از قطع سوکت
+        const SERVER_URL = "https://7c46-104-28-251-139.ngrok-free.app"; 
 
         // قرار دادن لینک دعوت جدید در اینپوت صفحه قفل مینی‌اپ
         document.getElementById('invite-link-input').value = `https://t.me/VegasLand_bot?start=${userTelegramId}`;
@@ -162,7 +162,6 @@
                     
                     container.innerHTML = '';
                     rooms.forEach(room => {
-                        // 🛠️ آیدی‌های اختصاصی کارت‌ها و نشان ظرفیت اضافه شد تا برای سوکت زنده قابل رهگیری باشند
                         container.innerHTML += `
                             <div id="room-card-${room.room_id}" class="flex justify-between items-center bg-slate-800/40 p-3 rounded-xl border border-slate-700 transition-all duration-500">
                                 <div>
@@ -203,30 +202,27 @@
             }
         });
         
-        // ۲. وقتی کاربری عضو می‌شود و تعداد تغییر می‌کند (آپدیت زنده بدون رفرش)
+        // ۲. آپدیت زنده ظرفیت بدون باگ undefined
         socket.on('room_update', (data) => {
             const countText = document.getElementById(`room-count-${data.roomId}`);
             if (countText) {
                 countText.innerText = `ظرفیت: ${data.currentCount}/${data.capacity} نفر`;
-                countText.classList.add('text-emerald-400'); // افکت رنگی موقت برای جلب توجه کاربر
+                countText.classList.add('text-emerald-400'); // افکت رنگی موقت
                 setTimeout(() => countText.classList.remove('text-emerald-400'), 1000);
             }
         });
 
-        // ۳. وقتی ظرفیت کامل می‌شود و قرعه‌کشی به پایان می‌رسد (افکت برنده زنده و غیب شدن اتاق)
+        // ۳. وقتی ظرفیت کامل می‌شود و قرعه‌کشی به پایان می‌رسد
         socket.on('lottery_finished', (data) => {
-            // بروزرسانی موجودی کاربر (چون شاید خودش برنده شده باشد!)
             checkUserStatusAndBalance();
 
-            // الف. غیب کردن اتاق از صفحه با انیمیشن ملایم CSS
             const roomCard = document.getElementById(`room-card-${data.roomId}`);
             if (roomCard) {
                 roomCard.style.opacity = "0";
                 roomCard.style.transform = "scale(0.9)";
-                setTimeout(() => roomCard.remove(), 500); // بعد از نیم ثانیه کاملا حذف می‌شود
+                setTimeout(() => roomCard.remove(), 500);
             }
 
-            // ب. افکت لرزش سنگین تلگرام + اعلان برنده به همه کاربران آنلاین مینی‌اپ
             tg.HapticFeedback.notificationOccurred('success');
             tg.showAlert(
                 `🎉 مدار کائنات چرخید!\n\n🎰 اتاق ${data.roomId} به پایان رسید.\n🏆 برنده خوش‌شانس: ${data.winnerName}\n💰 جایزه واریز شد.`
@@ -238,7 +234,7 @@
             const roomCard = document.getElementById(`room-card-${data.roomId}`);
             if (roomCard) {
                 roomCard.style.opacity = "0";
-                roomCard.style.transform = "translateX(50px)"; // افکت خروج از سمت راست
+                roomCard.style.transform = "translateX(50px)";
                 setTimeout(() => roomCard.remove(), 500);
             }
         });
