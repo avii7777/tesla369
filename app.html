@@ -20,6 +20,7 @@
 </head>
 <body class="flex flex-col min-h-screen p-4 justify-between">
 
+    <!-- هدر مینی اپ -->
     <div id="main-header" class="w-full flex justify-between items-center bg-slate-800/60 p-4 rounded-2xl border border-indigo-500/30 backdrop-blur-md">
         <div class="flex items-center gap-2">
             <div class="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center font-bold">⚡</div>
@@ -34,6 +35,7 @@
         </div>
     </div>
 
+    <!-- صفحه قفل (دعوت ۲ نفر) -->
     <div id="page-lock" class="page flex-col items-center my-auto gap-5 text-center hidden">
         <span class="text-6xl animate-bounce">🔒</span>
         <h2 class="text-base font-bold text-rose-400">دسترسی شما محدود است!</h2>
@@ -44,16 +46,18 @@
             <p class="text-[10px] text-indigo-400 mb-1">🔗 لینک دعوت اختصاصی شما:</p>
             <input type="text" id="invite-link-input" readonly class="bg-slate-950 text-slate-300 text-[10px] text-center p-2 rounded-lg w-full border border-slate-800 outline-none select-all" value="">
         </div>
-        <p class="text-[10px] text-slate-400">لینک بالا را کپی کن و برای دوستانت بفرست.</p>
+        <button onclick="copyInviteLink()" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md">کپی کردن لینک دعوت</button>
     </div>
 
+    <!-- صفحه اصلی (خانه) -->
     <div id="page-home" class="page active flex-col items-center my-auto gap-6">
-        <div id="luck-ball" class="w-44 h-44 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.4)] cursor-pointer active:scale-95 transition-all duration-100 border-4 border-indigo-300 animate-pulse">
-            <span class="text-5xl">🔮</span>
+        <div id="luck-ball" onclick="tapLuckBall()" class="w-44 h-44 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.4)] cursor-pointer active:scale-90 transition-all duration-100 border-4 border-indigo-300 animate-pulse">
+            <span class="text-5xl select-none">🔮</span>
         </div>
         <p class="text-center text-indigo-200 text-xs px-4">برای جذب انرژی مدار تسلا، گوی کائنات را لمس کن!</p>
     </div>
 
+    <!-- صفحه اتاق‌ها -->
     <div id="page-rooms" class="page flex-col w-full my-auto gap-4">
         <h2 class="text-sm font-bold text-indigo-400 border-b border-slate-700 pb-2">🎰 اتاق‌های شانس فعال (زنده)</h2>
         <div id="rooms-container" class="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
@@ -61,17 +65,19 @@
         </div>
     </div>
 
+    <!-- صفحه بلیط بخت‌آزمایی شبانه -->
     <div id="page-nightly" class="page flex-col w-full my-auto items-center gap-4 text-center">
         <span class="text-5xl">🎟️</span>
         <h2 class="text-sm font-bold text-purple-400">بخت‌آزمایی بزرگ شبانه تسلا</h2>
         <p class="text-xs text-slate-300 px-6">هر شب ساعت ۲۲:۰۰ قرعه‌کشی بزرگ انجام می‌شود. ۹۰٪ مبالغ به یک برنده خوش‌شانس می‌رسد!</p>
-        <button class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold text-xs mt-4 shadow-lg active:scale-95 transition-all">خرید بلیط شانس (۵,۰۰۰ تومان)</button>
+        <button onclick="buyNightlyTicket()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold text-xs mt-4 shadow-lg active:scale-95 transition-all">خرید بلیط شانس (۵,۰۰۰ تومان)</button>
     </div>
 
+    <!-- منوی پایینی اپلیکیشن -->
     <div id="main-nav" class="w-full grid grid-cols-3 gap-2 bg-slate-900/90 p-2 rounded-2xl border border-slate-800 backdrop-blur-lg">
-        <button onclick="switchPage('home')" class="nav-btn bg-indigo-600/20 text-indigo-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🔮 خانه</button>
-        <button onclick="switchPage('rooms')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎰 اتاق‌ها</button>
-        <button onclick="switchPage('nightly')" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎟️ شبانه</button>
+        <button id="nav-home" onclick="switchPage('home', this)" class="nav-btn bg-indigo-600/20 text-indigo-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🔮 خانه</button>
+        <button id="nav-rooms" onclick="switchPage('rooms', this)" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎰 اتاق‌ها</button>
+        <button id="nav-nightly" onclick="switchPage('nightly', this)" class="nav-btn text-slate-400 py-2.5 rounded-xl font-bold text-center text-xs transition-all">🎟️ شبانه</button>
     </div>
 
     <script>
@@ -85,14 +91,38 @@
             userTelegramId = tg.initDataUnsafe.user.id;
         } else {
             document.getElementById('username').innerText = "کاربر تسلا";
-            userTelegramId = 123456789;
+            userTelegramId = 123456789; // آی‌دی پیش‌فرض برای تست خارج از تلگرام
         }
 
-        // 🔗 ست شدن آدرس جدید لوکال‌تونل شما
-        const SERVER_URL = "https://4dfa-104-28-251-139.ngrok-free.app"; 
+        // 🔗 ست شدن آدرس جدید سرور
+        const SERVER_URL = "https://eleven-cooks-jam.loca.lt"; 
 
         document.getElementById('invite-link-input').value = `https://t.me/VegasLand_bot?start=${userTelegramId}`;
         
+        // کپی لینک دعوت
+        function copyInviteLink() {
+            const copyText = document.getElementById("invite-link-input");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showAlert("لینک دعوت با موفقیت کپی شد! بفرستش برای دوستات تا قفل برنامه‌ت باز بشه. 🚀");
+        }
+
+        // لمس گوی شانس
+        function tapLuckBall() {
+            tg.HapticFeedback.impactOccurred('heavy');
+            // در اینجا می‌توانی افکت چرخش یا رندوم صدا هم اضافه کنی.
+            tg.showAlert("شما انرژی مثبت مدار ۳۶۹ را جذب کردید! برای شرکت در بازی‌ها به بخش اتاق‌ها مراجعه کنید.");
+        }
+
+        // خرید بلیط شانس شبانه
+        function buyNightlyTicket() {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.sendData(JSON.stringify({ action: 'buy_nightly_ticket', userId: userTelegramId }));
+            tg.showAlert("درخواست خرید بلیط شبانه فرستاده شد! لطفاً ربات را بررسی کنید.");
+        }
+
         // 💰 خواندن وضعیت کاربر با هدر مخصوص لوکال‌تونل
         function checkUserStatusAndBalance() {
             if (!userTelegramId) return;
@@ -111,7 +141,7 @@
                         document.getElementById('main-header').style.display = 'flex';
                         document.getElementById('main-nav').style.display = 'grid';
                     } else {
-                        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+                        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                         document.getElementById('page-lock').style.display = 'flex';
                         document.getElementById('main-header').style.display = 'none';
                         document.getElementById('main-nav').style.display = 'none';
@@ -124,17 +154,25 @@
 
         checkUserStatusAndBalance();
 
-        function switchPage(pageId) {
+        // جابجایی بین صفحات با حل مشکل آرگومان event
+        function switchPage(pageId, buttonElement) {
             tg.HapticFeedback.impactOccurred('light');
+            
+            // مخفی کردن همه صفحات
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            // فعال‌سازی صفحه مورد نظر
             document.getElementById('page-' + pageId).classList.add('active');
 
+            // ریست کردن استایل تمامی دکمه‌های منو
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-indigo-600/20', 'text-indigo-400');
                 btn.classList.add('text-slate-400');
             });
-            event.currentTarget.classList.remove('text-slate-400');
-            event.currentTarget.classList.add('bg-indigo-600/20', 'text-indigo-400');
+            
+            // فعال کردن دکمه فشرده شده
+            buttonElement.classList.remove('text-slate-400');
+            buttonElement.classList.add('bg-indigo-600/20', 'text-indigo-400');
 
             if (pageId === 'rooms') {
                 loadRoomsFromServer();
